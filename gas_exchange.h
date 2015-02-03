@@ -1,32 +1,67 @@
-/*
- This is the Gas Exchange class. It encapsulates all the calculations to estimate photsynthetic rate, CO2 assimilation,
-  stomatal conductance, and transpiration for a square meter of leaf.
- Use SetParams to initialize with parameters for a specific variety of plant
- Use SetVal to pass environmental variables and return a structure with output.
+
+/*! @mainpage Photosynthesis Module 
+*  @section intro_sec Introduction
+*
+* This is a C++ module to simulate gas exchange processes in a leaf.  
+* The Gas Exchange class encapsulates all the calculations to estimate photsynthetic rate, 
+* CO2 assimilation,  stomatal conductance, and transpiration for a square meter of leaf. \n \n
+
+*  This is a coupled model of photosynthesis-stomatal conductance-energy balance for a maize leaf \n
+*  this unit simulates Maize leaf gas-exchange characteristics
+*  including photosynthesis, \n traspiration, boundary and stomatal conductances,
+*  and leaf temperature based \n on von Caemmerer (2000) C4 model, BWB stomatal
+* conductance (1987) and \n Energy balance model as described in Campbell and Norman (1998) 
+
+
+@authors Soo-Hyung Kim, Univ of Washington \n Dennis Timlin, USDA-ARS, Beltsville, MD \n  David Fleisher, USDA-ARS, Beltsville, MD \n
+@version 1.0
+@date January 2015
+@license This project is released under the GNU Public License
+
+  \n
+ <b>Bibliography </b>
+\li Kim, S.-H., and J.H. Lieth. 2003. A coupled model of photosynthesis, stomatal conductance and transpiration for a rose leaf (Rosa hybrida L.). Ann. Bot. 91:771-781. \n
+\li Kim, S.-H., D.C. Gitz, R.C. Sicher, J.T. Baker, D.J. Timlin, and V.R. Reddy. 2007. Temperature dependence of growth, development, and photosynthesis in maize under elevated CO2. Env. Exp. Bot. 61:224-236. \n
+\li Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Reddy. 2006. Canopy photosynthesis, evapotranspiration, leaf nitrogen, and transcription  \n
+\n
+
+<P>
+<b> Source Code </b>
+<BR>
+<a href="https://github.com/ARS-CSGCL-DT/PhotoSynthesisModule">Source Code is available on GITHUB</a>
+</P>
 */
-//#include "Stdafx.h"
-//! @brief This class simulates gas exchange in plant leaves
-//! @class CGasExchange 
+
+//</a href=https://github.com/ARS-CSGCL-DT/PhotoSynthesisModule>Github site</a> 
+
 
 #include "stdafx.h"
 
 using namespace std;
-namespace photomod
+namespace photomod   //!Photosynthesis Model NameSpace
 {
-class CGasExchange
+/*!Class for gas exchange calculations \n
+ @details This class simulates gas exchange in plant leaves. 
+Photosynthetic parameters were calibrated with Maize hybrid PI3733 from
+SPAR experiments at Beltsville, MD in 2002 (see Bibliography).
+\n\n
+Stomatal conductance parameters were not calibrated
+
+
+ Use <b>SetParams</b> to initialize with parameters for a specific variety of plant \n \n
+ Use <b>SetVal</b> to pass environmental variables and return a structure with output.
+*/
+
+class CGasExchange  
 {
   
 	
 public:
-  CGasExchange();
+  CGasExchange(); 
 
 	~CGasExchange(void);
-	   struct tParms    //!Structure to hold parameters for the model
-		{
-		 string   ID;
-		 std::string species;
-		 std::string Type;
- /*!
+	//! tParms Structure to hold parameters for the model
+	/*!
 		 *   parameter        description
 		 * note some parameters are specific for C3 or C4 type Plants
 		@param 	ID	 1		Name of plant
@@ -42,18 +77,25 @@ public:
 		@param 		Eaj    12		Activation energy for Arrhenius function used to calculate temperature dependence for J (kJ mol-1)
 		@param 		Hj     13		Curvature parameter of the temperature dpendence of Jmax (kJ mol-1)
 		@param		Sj	   14		Electron transport temperature response parameter for Jmax (J mole-1 K-1)
-		@param      Hv              Need descriptot ToDo
-		@param 	    EaVp   15		Activation energy for Arrhenius function used to calculate temperature dependence for Vpmax (kJ mol-1)
-		@param 	    Sv	   16		Electron transpor temperature response parameter for Vcmax (J mole-1 K-1)
-		@param 		EAP	   17		Activation energy for Arrhenius function used to calculate temperature dependence for TPU (kJ mol-1)
-		@param 		EAR	   18	 	Activation energy for Arrhenius function used to calculate temperature dependence for respiration (kJ mol-1) 
-		@param 		g0	   19		Minimum stomatal conductance to water vapor at the light compensation point in the BWB model (mol m-2 s-1)	
-		@param 	    g1	      20	Empirical coefficient for the sensitivity of StomatalConductance to A, Cs and hs in BWB model (no units?)
-		@param 		StomRatio	21	Stomatal Ratio
-		@param  	LfWidth   22	Leaf Width (m)
-		@param 		LfAngFact	23	Leaf Angle Factor		
-		@param 		Remark	24	Text 
+		@param      Hv     15       Curvature parameter of the temperature dependence of Vcmax (J mole-1)
+		@param 	    EaVp   16		Activation energy for Arrhenius function used to calculate temperature dependence for Vpmax (kJ mol-1)
+		@param 	    Sv	   17		Electron transport temperature response parameter for Vcmax (J mole-1 K-1)
+		@param 		EAP	   18		Activation energy for Arrhenius function used to calculate temperature dependence for TPU (kJ mol-1)
+		@param 		EAR	   19	 	Activation energy for Arrhenius function used to calculate temperature dependence for respiration (kJ mol-1) 
+		@param 		g0	   20		Minimum stomatal conductance to water vapor at the light compensation point in the BWB model (mol m-2 s-1)	
+		@param 	    g1	   21   	Empirical coefficient for the sensitivity of StomatalConductance to A, Cs and hs in BWB model (no units?)
+		@param 		StomRatio	22	Stomatal Ratio
+		@param  	LfWidth     23	Leaf Width (m)
+		@param 		LfAngFact	24	Leaf Angle Factor		
+		@param 		Remark		25	Text 
 	*/	
+
+	   struct tParms    
+		{
+		 string   ID;
+		 std::string species;
+		 std::string Type;
+ 
 		double  
 			    Vcm25, 
 			    Jm25, 
@@ -84,15 +126,15 @@ public:
     void SetVal(double PhotoFluxDensity, double Tair, double CO2, double RH, 
 	double wind, double Press, bool ConstantTemperature); 
 	            //!< sets input values for calculations for a particular set of environmental variables
-	double get_VPD(){ return VPD;}         //!<returns vapor pressure deficit (kpa)
-	double get_ANet() {return AssimilationNet;}      //!< returns net photosynthesis (umol CO2 m-2 s-1)
-	double get_AGross() {return AssimilationGross;}  //!< returns gross photosynthesis  (umol CO2 m-2 s-1)
-	double get_Transpiration()     {return ET;}   //!< returns transpiration rate (umol H2O m-2 s-1)
-	double get_LeafTemperature() {return Tleaf;} //!< returns leaf temperature (C)
-	double get_Ci()    {return Ci;}        //!< returns internal CO2 concentration (umol mol-1)
-	double get_StomatalConductance()    {return StomatalConductance;}    //!< returns stomatal conductance to water vapor (mol m-2 s-1)
-	double get_BoundaryLayerConductance()    {return BoundaryLayerConductance;}    //!< returns boundary layer conductance (mol m-2 s-1)
-	double get_Respiration() {return DarkRespiration;}   //!< returns respiration rate (umol CO2 m-2 s-1)
+	double get_VPD(){ return VPD;}         //!< \return vapor pressure deficit (kpa)
+	double get_ANet() {return AssimilationNet;}      //!< \return net photosynthesis (umol CO2 m-2 s-1)
+	double get_AGross() {return AssimilationGross;}  //!< \return gross photosynthesis  (umol CO2 m-2 s-1)
+	double get_Transpiration()     {return Transpiration;}   //!< \return transpiration rate (umol H2O m-2 s-1)
+	double get_LeafTemperature() {return Tleaf;} //!< \return leaf temperature (C)
+	double get_Ci()    {return Ci;}        //!< \return internal CO2 concentration (umol mol-1)
+	double get_StomatalConductance()    {return StomatalConductance;}    //!< \return stomatal conductance to water vapor (mol m-2 s-1)
+	double get_BoundaryLayerConductance()    {return BoundaryLayerConductance;}    //!< \return boundary layer conductance (mol m-2 s-1)
+	double get_Respiration() {return DarkRespiration;}   //!< \return respiration rate (umol CO2 m-2 s-1)
 	void  SetParams(tParms *sParms);              //!<used to pass structure with parameters from the main program
 
 protected:
@@ -110,7 +152,7 @@ protected:
 
    double AssimilationNet,    //!< net photosynthesis (umol CO2 m-2 s-1) 
 	      AssimilationGross, //!< gross photosynthesis (umol CO2 m-2 s-1) (Adjusted for respiration)
-	      ET,     //!< evapotranspiration mol h2o m-2 s-1 
+	      Transpiration,     //!< transpiration mol h2o m-2 s-1 
 		  Tleaf,  //!< Leaf temperature C 
 		  Ci,     //!< Internal CO2 concentration umol mol-1 
 		  StomatalConductance,     //!< stomatal conductance umol m-2 s-1 
@@ -132,20 +174,20 @@ protected:
    void PhotosynthesisC3(double Ci);  //!<C3 photosynthesis module
    void PhotosynthesisC4(double Ci);  //!<C4 photosynthesis module
    void EnergyBalance();     //!<calculates leaf temperature and transpiration
-   double SearchCi(double CO2i);          //!< called iterively to find optimal internal CO2 concentration
-   double EvalCi(double Ci);   //!<Calls photosynthesis modules to evaluate Ci dependent calculations
+   double SearchCi(double CO2i);          //!< called iterively to find optimal internal CO2 concentration returns optimal internal CO2 concentration (CO2i) 
+   double EvalCi(double Ci);   //!<Calls photosynthesis modules to evaluate Ci dependent calculations returns internal CO2 concentration
 
-   double CalcStomatalConductance();             //!< calculates and returns stomatal conductance (mol m-2 s-1)
-   double CalcTurbulentVaporConductance();             //!<  calculates and returns conductance for turbulant vapor transfer in air - forced convection (mol m-2 s-1)
-   double Es(double Temperature);      //!< calculates and returns saturated vapor pressure at temperature (T). kPa
-   double Slope(double Temperature);  //!< calculates and returns slope of the vapor pressure curve
+   double CalcStomatalConductance();             //!< returns stomatal conductance (mol m-2 s-1)
+   double CalcTurbulentVaporConductance();             //!<  returns conductance for turbulant vapor transfer in air - forced convection (mol m-2 s-1)
+   double Es(double Temperature);      //!< returns saturated vapor pressure at temperature (T). kPa
+   double Slope(double Temperature);  //!<  returns slope of the vapor pressure curve
    double QuadSolnUpper (double a, double b, double c ); //!< returns upper part of quadratic equation solution
    double QuadSolnLower (double a, double b, double c ); //!< returns lower part of quadratic equation solution
-    double minh(double fn1,double fn2,double theta2); //!< hyperbolic minimum
+    double minh(double fn1,double fn2,double theta2); //!< returns hyperbolic minimum
 	double get_CiCaRatio()  {return Ci_Ca;} //!< returns ratio between internal and atmospheric CO2
    int iter1, iter2;         //!< holds iteration counters
-   int  iter_Ci;   /*!< iteration value for Ci */
-	bool isCiConverged; /*!< true if Ci iterations have converged */
+   int  iter_Ci;   /*!< iteration value for Ci umol mol-1, internal CO2 concentration */
+	bool isCiConverged; /*!< true if Ci (internal CO2 concentration) iterations have converged */
   
 
  
