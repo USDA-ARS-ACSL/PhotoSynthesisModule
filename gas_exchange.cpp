@@ -1,11 +1,12 @@
 
-/** class CGas_Exchange
+
+
+/* !
+@file Gas_exchange.cpp
+class CGas_Exchange 
    Additional functions and variables
-   @file
-   
+   file GasExchange.CPP Holds class definitions
 */
-
-
 //using namespace System.math;
 #include "stdafx.h"
 #include "gas_exchange.h"
@@ -14,7 +15,7 @@ using namespace std;
 
 namespace photomod
 {
-// General fixed parameters
+	// General fixed parameters
 #define R 8.314  //!< idealgasconstant
 #define maxiter 200 //!< maximum number of iterations
 #define epsilon 0.97   //!<emissivity See Campbell and Norman, 1998, page 163 (CHECK) 
@@ -36,30 +37,7 @@ namespace photomod
 	inline double Min(double a, double b, double c) {return (__min(__min(a,b),c));}
  
 	//note that '<' indicates member is before the block and not after for Doxygen
-/**! @class CGasExchange 
-    @detail
-	 
- 
- Coupled model of photosynthesis-stomatal conductance-energy balance for a maize leaf \n
-  this unit simulates Maize leaf gas-exchange characteristics
-  including photosynthesis, \n traspiration, boundary and stomatal conductances,
-  and leaf temperature based \n on von Caemmerer (2000) C4 model, BWB stomatal
-conductance (1987) and \n Energy balance model as described in Campbell and Norman (1998) 
 
-Photosynthetic parameters were calibrated with PI3733 from
-SPAR experiments at Beltsville, MD in 2002.
-
-Stomatal conductance parameters were not calibrated
-
-@authors Soo-Hyung Kim, Univ of Washington \n Dennis Timlin, USDA-ARS \n  David Fleisher, USDA-ARS \n
-@version 1.0
-@date August 2013
-
-@note <b>-Bibliography </b>\n
-Kim, S.-H., and J.H. Lieth. 2003. A coupled model of photosynthesis, stomatal conductance and transpiration for a rose leaf (Rosa hybrida L.). Ann. Bot. 91:771–781. \n
-Kim, S.-H., D.C. Gitz, R.C. Sicher, J.T. Baker, D.J. Timlin, and V.R. Reddy. 2007. Temperature dependence of growth, development, and photosynthesis in maize under elevated CO2. Env. Exp. Bot. 61:224-236. \n
-Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Reddy. 2006. Canopy photosynthesis, evapotranspiration, leaf nitrogen, and transcription  \n
-*/
 	CGasExchange::CGasExchange()
 		//! This is the constructor
 		
@@ -144,10 +122,9 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		* @param[in] PhotoFluxDensity	Photosynthetic Flux Density (umol Quanta m-2 s-1) (check)
 		* @param[in] Tair	Air Temperature (C)
 		* @param[in] CO2	CO2 concentration of the air (umol mol-1)
-		* @param[in] RH	Relative Humidity (%)
+		* @param[in] RH	    Relative Humidity (%)
 		* @param[in] wind	Windspeed at 2.5 m, m s-1
 		* @param[in] Press	Atmospheric pressure (kpa m-2)
-		* @param[in] Width	Leaf width (m)
 		* @param[in] ConstantTemperature boolian if true, leaf temperature=air temperature when calculating gas exchange
 		\return nothing
 		*/
@@ -163,7 +140,6 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		this->CO2 = CO2;
 		this->RH = __min(100.0, __max(RH, 10.0))/100;
 		this->Tair = Tair;
-		//this->width = width;
 		this->wind = wind;
 		this->Press = Press;
 		ConstantLeafTemperature=ConstantTemperature;
@@ -199,28 +175,31 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		}
 	void CGasExchange::PhotosynthesisC3(double Ci)    
 		/**
-		*Calculates photosynthesis for C3 plants tadaaa.
-		*Uses as input incident PhotoFluxDensity, Air temp in C, CO2 in ppm, RH in per per percent.
+		*Calculates photosynthesis for C3 plants \n
+		*Uses as input incident PhotoFluxDensity, Air temp in C, CO2 in ppm, RH in per percent.
 		@see SetVal() 
 		@param[in] Ci - internal CO2 concentration, umol mol-1
 
 		\return nothing.
 		
 		*/
+		//** \code
 		{
-		//parameters for C3 Photosythesis
-		const double curvature =0.999; /**< Curvature -factor of Av and Aj colimitation */
-		const int		Kc25 = 404; /*! < MM Constant of rubisco for CO2 of C3 plants (de Pury and Farquar, 1997) ?units */
-		const int		Ko25 = 278; /*!< MM Constant of rubiscuo for O2 from above reference ?units */
-		const long      Eac = 59400; /*!< Eac Energy Activation ?units */
+		//parameters for C3 Photosythesis; 
+		const double curvature=0.999 ; //!< Curvature -factor of Av and Aj colimitation 
+			
+		const int		Kc25 = 404;//!< Kc25, MM Constant of rubisco for CO2 of C3 plants (de Pury and Farquar, 1997) (umol m-2 s-1) 
+		const int		Ko25 = 278;//!< Ko25, MM Constant of rubiscuo for O2 from above reference (umol m-2 s-1) 
+		const long      Eac = 59400;//!< Eac, Energy Activation kJ mol-1
 
-		const long       Eao = 36000;   /*!< Eao activation energy values */
+		const long       Eao = 36000;//!< Eao, activation energy values 
+		//** \endcode
 		// These variables hold temporary calculations
 		double alpha, Kc, Ko, gamma, Ia,Jmax, Vcmax, TPU, J, Av, Aj, Ap, Ac, Km, Ca, Cc, P;
 		gamma = 36.9 + 1.88*(Tleaf-25)+0.036*Square(Tleaf-25);  // CO2 compensation point in the absence of mitochondirial respiration, in ubar}
 //* Light response function parameters */
 		Ia = PhotoFluxDensity*(1-scatt);    //* absorbed irradiance */
-		alpha = (1-f)/2; // apparent quantum efficiency, params adjusted to get value 0.3 for average C3 leaf
+		alpha = (1-f)/2; // *!apparent quantum efficiency, params adjusted to get value 0.3 for average C3 leaf
 
 		AssimilationNet = 0;
 
@@ -270,22 +249,22 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		\return nothing
 		*/
 		{
-		const double    curvature=0.995; //!<curvature factor af Av and Aj collation 
+		const double    curvature=0.995; //!<curvature factor of Av and Aj colimitation
 
        
-		const int       Kc25 = 650,    //!< Michaelis constant of rubisco for CO2 of C4 plants (2.5 times that of tobacco), ubar, Von Caemmerer 2000 
-		                Ko25 = 450,    //!< Michaelis constant of rubisco for O2 (2.5 times C3), mbar 
-		        		Kp25 = 57;     /*!< Michaelis constant for PEP caboxylase for CO2 - was 60 in Soo's paper */
-		const long       Eao = 36000;   /*!< activation energy for Ko,  Eac was 59400 */
-		const int	    Vpr25 = 80; /*!< PEP regeneration limited Vp at 25C, value adopted from vC book */
-		const double	gbs = 0.003; /*!< bundle sheath conductance to CO2, umol m-2 s-1 gbs x Cm is the inward diffusion of CO2 into the bundle sheath  */
-		const double    x = 0.4;  /*!< Partitioning factor of J, yield maximal J at this value */
-		const double    alpha = 0.001; /*!< fraction of PSII activity in the bundle sheath cell, very low for NADP-ME types  */
-		const double    gi = 5.0; /*!< conductance to CO2 from intercelluar to mesophyle, mol m-2 s-1, assumed  was 1, changed to 5 as per Soo 6/2012*/
-		const double    beta = 0.99; /*!< smoothing factor */
-		const double    gamma1 = 0.193; /*!< half the reciprocal of rubisco specificity, to account for O2 dependence of CO2 comp point, note that this become the same as that in C3 model when multiplied by [O2] */
+		const int       Kc25 = 650,    //!< Kc25, Michaelis constant of rubisco for CO2 of C4 plants (2.5 times that of tobacco), ubar, Von Caemmerer 2000 
+		                Ko25 = 450,    //!< Ko25, Michaelis constant of rubisco for O2 (2.5 times C3), mbar 
+		        		Kp25 = 57;     /*!< Kp25, Michaelis constant for PEP caboxylase for CO2 - was 60 in Soo's paper */
+		const long       Eao = 36000;   /*!< EAO, activation energy for Ko */
+		const int	    Vpr25 = 80; /*!<   Vpr25, PEP regeneration limited Vp at 25C, value adopted from vC book */
+		const double	gbs = 0.003; /*!< gbs, bundle sheath conductance to CO2, umol m-2 s-1 gbs x Cm is the inward diffusion of CO2 into the bundle sheath  */
+		const double    x = 0.4;  /*!< x, Partitioning factor of J, yield maximal J at this value */
+		const double    alpha = 0.001; /*!< alpha, fraction of PSII activity in the bundle sheath cell, very low for NADP-ME types  */
+		const double    gi = 5.0; /*!< gi, conductance to CO2 from intercelluar to mesophyle, mol m-2 s-1, assumed  was 1, changed to 5 as per Soo 6/2012*/
+		const double    beta = 0.99; /*!< beta, smoothing factor */
+		const double    gamma1 = 0.193; /*!< gamma1, half the reciprocal of rubisco specificity, to account for O2 dependence of CO2 comp point, note that this become the same as that in C3 model when multiplied by [O2] */
 
-		double Kp, Kc, Ko, Km; //!<Calculated Michaelis params as a function of temperature
+		double Kp, Kc, Ko, Km; //!<Kp, Kc, Ko, Km, Calculated Michaelis params as a function of temperature
 		double Ia, I2;       // Calculated light variables
 		double Vpmax, Jmax, Vcmax, Eac, Om, Rm, J, Ac1, Ac2, Ac, Aj1,
 			Aj2, Aj, Vp1, Vp2, Vp, P,  Ca, Cm, Vpr,
@@ -339,23 +318,23 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		AssimilationNet=minh(Ac,Aj, curvature);
 		gs_last=StomatalConductance;
 		Os = alpha*AssimilationNet/(0.047*gbs)+Om; //* Bundle sheath O2 partial pressure, mbar */
-		//       Cbs = Cm + (Vp-AssimilationNet-Rm)/gbs; //* Bundle sheath CO2 partial pressure, ubar */
 		GammaStar = gamma1*Os;
 		Gamma = (DarkRespiration*Km + Vcmax*GammaStar)/(Vcmax-DarkRespiration);
-		AssimilationGross = __max(0, AssimilationNet + DarkRespiration); // gets negative when PhotoFluxDensity = 0, DarkRespiration needs to be examined, 10/25/04, SK
+		AssimilationGross = __max(0, AssimilationNet + DarkRespiration); 
 
 		}
 
 
 	void CGasExchange::EnergyBalance()
 		/** 
-		    Calculates Evaportranspiration rate (ET) and leaf temperature (Tleaf)
+		    Calculates Transpiration rate (T) and leaf temperature (Tleaf). Iterates by recalculating
+			photosynthesis until leaf temperatures converge
 
 		    See Campbell and Norman (1998) pp 224-225
 			
 			Does not have input 
 
-			\return nothing
+			\return nothing but calculates transpiration (T) and leaf temperature (Tleaf)
 					    
 			Because Stefan-Boltzman constant is for unit surface area by denifition,
 			all terms including sbc are multilplied by 2 (i.e., RadiativeConductance, thermal radiation)
@@ -364,13 +343,13 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		{
 		const long Lambda = 44000; //latent heat of vaporization of water J mol-1 - not used in this implementation
 		const double Cp = 29.3; // thermodynamic psychrometer constant and specific hear of air, J mol-1 C-1
-		const double psc = 6.66e-4; //psycrometric constant units are per C
+		const double psc = 6.66e-4; //psycrometric constant units are C-1
 		//psc=Cp/Lambda = 29.3/44000 See Campbell and Norman, pg 232, after eq 14.11
 
 		//The following are secondary variables used in the energy balance
-		double HeatConductance,  //heat conductance j m-2 s-1
+		double HeatConductance,  //heat conductance J m-2 s-1
 			VaporConductance, //vapor conductance ratio of stomatal and heat conductance mol m-2 s-1
-			RadiativeConductance, //radiative conductance 
+			RadiativeConductance, //radiative conductance J m-2 s-1
 			RadiativeAndHeatConductance, //radiative+heat conductance
 			psc1,  // apparent psychrometer constant Campbell and Norman, page 232 after eq 14.11
 			Ea,   //ambient vapor pressure kPa
@@ -407,7 +386,7 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 			}
 		Tleaf=newTi;
 
-		ET =1000*VaporConductance*(Es(Tleaf)-Ea)/Press; //Don't need Lambda - cancels out see eq 14.10 in Campbell and Norman, 1998
+		Transpiration =1000*VaporConductance*(Es(Tleaf)-Ea)/Press; //Don't need Lambda - cancels out see eq 14.10 in Campbell and Norman, 1998
 		// umol m-2 s-1. note 1000 converts from moles to umol
 		}
 
@@ -460,7 +439,7 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		/**
 		  * calculates and returns conductance for turbulant vapor transfer in air - forced convection
 		  *  units are mol m-2 s-1
-		  /return conductance for turbulent vapor transfer in air
+		  \return conductance for turbulent vapor transfer in air
 		  */
 
 		double ratio;
@@ -468,7 +447,6 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		ratio = Square(sParms.stomaRatio+1)/(Square(sParms.stomaRatio)+1);
 		d = sParms.LfWidth*0.72; // characteristic dimension of a leaf, leaf width in m
 		// wind is in m per second
-		//  return 1.42; // total BLC (both sides) for LI6400 leaf chamber
 		return (1.4*0.147*sqrt(__max(0.1,wind)/d))*ratio; 
 		// multiply by 1.4 for outdoor condition, Campbell and Norman (1998), p109, gva
 		// multiply by ratio to get the effective blc (per projected area basis), licor 6400 manual p 1-9
@@ -483,7 +461,7 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		 */
 
 		double result;
-		// a=0.611 kPa, b=17.501 C and c=240.97 C 
+		// a=0.611 kPa, b=17.502 C and c=240.97 C 
 		//Units of Es are kPa
 	    result=(0.611*exp(17.502*Temperature/(240.97+Temperature)));
 		return result;
@@ -500,11 +478,9 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		  */
 
 		{
-		double TSlope, Temp1, Temp2; // for checking the value
+		double TSlope;
 		// units of b and c are  degrees C
 		const double b= 17.502; const double c= 240.97;
-		Temp1=Es(Temperature);  //Temperature for saturated vapor pressure
-		Temp2=Square(c+Temperature);
 		TSlope=(Es(Temperature)*(b*c)/Square(c+Temperature)/Press);
 		return TSlope; 
 		}
@@ -640,9 +616,9 @@ Kim, S.-H., R.C. Sicher, H. Bae, D.C. Gitz, J.T. Baker, D.J. Timlin, and V.R. Re
 		{
 		
 		/**  
-		    @param fn1 first value to be compared for min
-		    @param fn2 second value to be compared for min
-			@param theta2  curvature factor
+		    @param [in] fn1 first value to be compared for min
+		    @param [in] fn2 second value to be compared for min
+			@param [in] theta2  curvature factor
 
 			\return hyperbolic minimum
 			*/
