@@ -4,11 +4,6 @@
 	Version="9.00"
 	Name="Photosynthesis(notManaged)"
 	ProjectGUID="{516FE7DB-711F-4417-A6FB-BB444152F6B2}"
-	RootNamespace="PhotosynthesisnotManaged"
-	SccProjectName="SAK"
-	SccAuxPath="SAK"
-	SccLocalPath="SAK"
-	SccProvider="SAK"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
