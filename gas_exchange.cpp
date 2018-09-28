@@ -415,15 +415,13 @@ namespace photomod
 		//** \endcode
 
 		double P=Press/100;  
-		//BLC was not correct for conductance in the area of the stomata. corrected with 1.37
-		double AdjBoundaryLayerConductance = BoundaryLayerConductance / 1.37;
-		Cs = (CO2 - (1.37*AssimilationNet/AdjBoundaryLayerConductance))*P; // surface CO2 in mole fraction
+		Cs = (CO2 - (1.37*AssimilationNet/BoundaryLayerConductance))*P; // surface CO2 in mole fraction
 		if (Cs == Gamma) Cs = Gamma + 1;
 		if (Cs <= Gamma) Cs = Gamma + 1;
 		// Quadratic equation to obtain hs by combining StomatalConductance with diffusion equation
 		aa = sParms.g1*AssimilationNet/Cs;
-		bb = sParms.g0+AdjBoundaryLayerConductance-(sParms.g1*AssimilationNet/Cs);
-		cc = (-RH*AdjBoundaryLayerConductance)-sParms.g0;
+		bb = sParms.g0+BoundaryLayerConductance-(sParms.g1*AssimilationNet/Cs);
+		cc = (-RH*BoundaryLayerConductance)-sParms.g0;
 		hs = QuadSolnUpper(aa,bb,cc);
 		if (hs > 1) hs = 1;
 		if (hs<0) hs = 0;
